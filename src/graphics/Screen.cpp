@@ -123,10 +123,10 @@ static bool heartbeat = false;
 
 #define getStringCenteredX(s) ((SCREEN_WIDTH - display->getStringWidth(s)) / 2)
 
-/// Check if the display can render a string (detect special chars; emoji)
+// Check if the display can render a string (detect special chars; emoji)
 static bool haveGlyphs(const char *str)
 {
-#if defined(OLED_PL) || defined(OLED_UA) || defined(OLED_RU)
+#if defined(OLED_PL) || defined(OLED_UA) || defined(OLED_RU) || defined(OLED_CS)
     // Don't want to make any assumptions about custom language support
     return true;
 #endif
@@ -162,11 +162,7 @@ static void drawIconScreen(const char *upperMsg, OLEDDisplay *display, OLEDDispl
 
     display->setFont(FONT_MEDIUM);
     display->setTextAlignment(TEXT_ALIGN_LEFT);
-#ifdef USERPREFS_SPLASH_TITLE
-    const char *title = USERPREFS_SPLASH_TITLE;
-#else
     const char *title = "meshtastic.org";
-#endif
     display->drawString(x + getStringCenteredX(title), y + SCREEN_HEIGHT - FONT_HEIGHT_MEDIUM, title);
     display->setFont(FONT_SMALL);
 
@@ -184,6 +180,56 @@ static void drawIconScreen(const char *upperMsg, OLEDDisplay *display, OLEDDispl
 
     display->setTextAlignment(TEXT_ALIGN_LEFT); // Restore left align, just to be kind to any other unsuspecting code
 }
+
+#ifdef USERPREFS_OEM_TEXT
+
+static void drawOEMIconScreen(const char *upperMsg, OLEDDisplay *display, OLEDDisplayUiState *state, int16_t x, int16_t y)
+{
+    static const uint8_t xbm[] = USERPREFS_OEM_IMAGE_DATA;
+    display->drawXbm(x + (SCREEN_WIDTH - USERPREFS_OEM_IMAGE_WIDTH) / 2,
+                     y + (SCREEN_HEIGHT - FONT_HEIGHT_MEDIUM - USERPREFS_OEM_IMAGE_HEIGHT) / 2 + 2, USERPREFS_OEM_IMAGE_WIDTH,
+                     USERPREFS_OEM_IMAGE_HEIGHT, xbm);
+
+    switch (USERPREFS_OEM_FONT_SIZE) {
+    case 0:
+        display->setFont(FONT_SMALL);
+        break;
+    case 2:
+        display->setFont(FONT_LARGE);
+        break;
+    default:
+        display->setFont(FONT_MEDIUM);
+        break;
+    }
+
+    display->setTextAlignment(TEXT_ALIGN_LEFT);
+    const char *title = USERPREFS_OEM_TEXT;
+    display->drawString(x + getStringCenteredX(title), y + SCREEN_HEIGHT - FONT_HEIGHT_MEDIUM, title);
+    display->setFont(FONT_SMALL);
+
+    // Draw region in upper left
+    if (upperMsg)
+        display->drawString(x + 0, y + 0, upperMsg);
+
+    // Draw version and shortname in upper right
+    char buf[25];
+    snprintf(buf, sizeof(buf), "%s\n%s", xstr(APP_VERSION_SHORT), haveGlyphs(owner.short_name) ? owner.short_name : "");
+
+    display->setTextAlignment(TEXT_ALIGN_RIGHT);
+    display->drawString(x + SCREEN_WIDTH, y + 0, buf);
+    screen->forceDisplay();
+
+    display->setTextAlignment(TEXT_ALIGN_LEFT); // Restore left align, just to be kind to any other unsuspecting code
+}
+
+static void drawOEMBootScreen(OLEDDisplay *display, OLEDDisplayUiState *state, int16_t x, int16_t y)
+{
+    // Draw region in upper left
+    const char *region = myRegion ? myRegion->name : NULL;
+    drawOEMIconScreen(region, display, state, x, y);
+}
+
+#endif
 
 void Screen::drawFrameText(OLEDDisplay *display, OLEDDisplayUiState *state, int16_t x, int16_t y, const char *message)
 {
@@ -1015,7 +1061,7 @@ static void drawTextMessageFrame(OLEDDisplay *display, OLEDDisplayUiState *state
                          y + (SCREEN_HEIGHT - FONT_HEIGHT_MEDIUM - devil_height) / 2 + 2 + 5, devil_width, devil_height, devil);
     } else if (strcmp(msg, "♥️") == 0 || strcmp(msg, "\U0001F9E1") == 0 || strcmp(msg, "\U00002763") == 0 ||
                strcmp(msg, "\U00002764") == 0 || strcmp(msg, "\U0001F495") == 0 || strcmp(msg, "\U0001F496") == 0 ||
-               strcmp(msg, "\U0001F497") == 0 || strcmp(msg, "\U0001F496") == 0) {
+               strcmp(msg, "\U0001F497") == 0 || strcmp(msg, "\U0001F498") == 0) {
         display->drawXbm(x + (SCREEN_WIDTH - heart_width) / 2,
                          y + (SCREEN_HEIGHT - FONT_HEIGHT_MEDIUM - heart_height) / 2 + 2 + 5, heart_width, heart_height, heart);
     } else {
@@ -1506,7 +1552,7 @@ Screen::Screen(ScanI2C::DeviceAddress address, meshtastic_Config_DisplayConfig_O
 #elif defined(USE_ST7567)
     dispdev = new ST7567Wire(address.address, -1, -1, geometry,
                              (address.port == ScanI2C::I2CPort::WIRE1) ? HW_I2C::I2C_TWO : HW_I2C::I2C_ONE);
-#elif ARCH_PORTDUINO
+#elif ARCH_PORTDUINO && !HAS_TFT
     if (settingsMap[displayPanel] != no_screen) {
         LOG_DEBUG("Make TFTDisplay!");
         dispdev = new TFTDisplay(address.address, -1, -1, geometry,
@@ -1658,6 +1704,10 @@ void Screen::setup()
     // Set the utf8 conversion function
     dispdev->setFontTableLookupFunction(customFontTableLookup);
 
+#ifdef USERPREFS_OEM_TEXT
+    logo_timeout *= 2; // Double the time if we have a custom logo
+#endif
+
     // Add frames.
     EINK_ADD_FRAMEFLAG(dispdev, DEMAND_FAST);
     alertFrames[0] = [this](OLEDDisplay *display, OLEDDisplayUiState *state, int16_t x, int16_t y) -> void {
@@ -1718,7 +1768,7 @@ void Screen::setup()
 #endif
     serialSinceMsec = millis();
 
-#if ARCH_PORTDUINO
+#if ARCH_PORTDUINO && !HAS_TFT
     if (settingsMap[touchscreenModule]) {
         touchScreenImpl1 =
             new TouchScreenImpl1(dispdev->getWidth(), dispdev->getHeight(), static_cast<TFTDisplay *>(dispdev)->getTouch);
@@ -1802,6 +1852,22 @@ int32_t Screen::runOnce()
         stopBootScreen();
         showingBootScreen = false;
     }
+
+#ifdef USERPREFS_OEM_TEXT
+    static bool showingOEMBootScreen = true;
+    if (showingOEMBootScreen && (millis() > ((logo_timeout / 2) + serialSinceMsec))) {
+        LOG_INFO("Switch to OEM screen...");
+        // Change frames.
+        static FrameCallback bootOEMFrames[] = {drawOEMBootScreen};
+        static const int bootOEMFrameCount = sizeof(bootOEMFrames) / sizeof(bootOEMFrames[0]);
+        ui->setFrames(bootOEMFrames, bootOEMFrameCount);
+        ui->update();
+#ifndef USE_EINK
+        ui->update();
+#endif
+        showingOEMBootScreen = false;
+    }
+#endif
 
 #ifndef DISABLE_WELCOME_UNSET
     if (showingNormalScreen && config.lora.region == meshtastic_Config_LoRaConfig_RegionCode_UNSET) {
