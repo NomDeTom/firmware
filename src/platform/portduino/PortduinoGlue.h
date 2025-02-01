@@ -31,7 +31,7 @@ enum configNames {
     sx128x_max_power,
     lr1110_max_power,
     lr1120_max_power,
-    lr11x0_rf_switch,
+    lr11x0_type,
     rf95_max_power,
     dio2_as_rf_switch,
     dio3_tcxo_voltage,
