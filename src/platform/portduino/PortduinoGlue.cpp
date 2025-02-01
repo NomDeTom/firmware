@@ -430,7 +430,7 @@ bool loadConfig(const char *configPath)
                     }
                 }
             }
-            if (settingsStrings[lr11x0_rf_switch] == "E80") {
+            if (settingsStrings[lr11x0_type] == "E80") {
                 // if its an E80 attached, use this switching table
                 const uint32_t rfswitch_dio_pins[] = {RADIOLIB_LR11X0_DIO5, RADIOLIB_LR11X0_DIO6, RADIOLIB_LR11X0_DIO7,
                                                     RADIOLIB_NC, RADIOLIB_NC}
