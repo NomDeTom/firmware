@@ -16,7 +16,7 @@ Lora:
   spidev: spidev0.0 #pins are (CS=16, CLK=17, MOSI=18, MISO=19)
   spiSpeed: 2000000
 
-  lr11x0: E80
+  lr11x0_type: E80
 
 General:
   MACAddressSource: eth0
