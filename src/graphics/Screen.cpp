@@ -1446,9 +1446,9 @@ static void drawNodeInfo(OLEDDisplay *display, OLEDDisplayUiState *state, int16_
 
     static char distStr[20];
     if (config.display.units == meshtastic_Config_DisplayConfig_DisplayUnits_IMPERIAL) {
-        strncpy(distStr, "? mi", sizeof(distStr)); // might not have location data
+        strncpy(distStr, "? mi ?°", sizeof(distStr)); // might not have location data
     } else {
-        strncpy(distStr, "? km", sizeof(distStr));
+        strncpy(distStr, "? km ?°", sizeof(distStr));
     }
     meshtastic_NodeInfoLite *ourNode = nodeDB->getMeshNode(nodeDB->getNodeNum());
     const char *fields[] = {username, lastStr, signalStr, distStr, NULL};
@@ -1481,18 +1481,6 @@ static void drawNodeInfo(OLEDDisplay *display, OLEDDisplayUiState *state, int16_
             float d =
                 GeoCoord::latLongToMeter(DegD(p.latitude_i), DegD(p.longitude_i), DegD(op.latitude_i), DegD(op.longitude_i));
 
-            if (config.display.units == meshtastic_Config_DisplayConfig_DisplayUnits_IMPERIAL) {
-                if (d < (2 * MILES_TO_FEET))
-                    snprintf(distStr, sizeof(distStr), "%.0f ft", d * METERS_TO_FEET);
-                else
-                    snprintf(distStr, sizeof(distStr), "%.1f mi", d * METERS_TO_FEET / MILES_TO_FEET);
-            } else {
-                if (d < 2000)
-                    snprintf(distStr, sizeof(distStr), "%.0f m", d);
-                else
-                    snprintf(distStr, sizeof(distStr), "%.1f km", d / 1000);
-            }
-
             float bearingToOther =
                 GeoCoord::bearing(DegD(op.latitude_i), DegD(op.longitude_i), DegD(p.latitude_i), DegD(p.longitude_i));
             // If the top of the compass is a static north then bearingToOther can be drawn on the compass directly
@@ -1500,6 +1488,22 @@ static void drawNodeInfo(OLEDDisplay *display, OLEDDisplayUiState *state, int16_
             if (!config.display.compass_north_top)
                 bearingToOther -= myHeading;
             screen->drawNodeHeading(display, compassX, compassY, compassDiam, bearingToOther);
+
+            float bearingToOtherDegrees = (bearingToOther < 0) ? bearingToOther + 2 * PI : bearingToOther;
+            bearingToOtherDegrees = bearingToOtherDegrees * 180 / PI;
+
+            if (config.display.units == meshtastic_Config_DisplayConfig_DisplayUnits_IMPERIAL) {
+                if (d < (2 * MILES_TO_FEET))
+                    snprintf(distStr, sizeof(distStr), "%.0fft   %.0f°", d * METERS_TO_FEET, bearingToOtherDegrees);
+                else
+                    snprintf(distStr, sizeof(distStr), "%.1fmi   %.0f°", d * METERS_TO_FEET / MILES_TO_FEET,
+                             bearingToOtherDegrees);
+            } else {
+                if (d < 2000)
+                    snprintf(distStr, sizeof(distStr), "%.0fm   %.0f°", d, bearingToOtherDegrees);
+                else
+                    snprintf(distStr, sizeof(distStr), "%.1fkm   %.0f°", d / 1000, bearingToOtherDegrees);
+            }
         }
     }
     if (!hasNodeHeading) {
@@ -2644,13 +2648,12 @@ void DebugInfo::drawFrameSettings(OLEDDisplay *display, OLEDDisplayUiState *stat
             display->drawString(x + 1, y, String("USB"));
     }
 
-    auto mode = DisplayFormatters::getModemPresetDisplayName(config.lora.modem_preset, true);
+    //    auto mode = DisplayFormatters::getModemPresetDisplayName(config.lora.modem_preset, true);
 
-    display->drawString(x + SCREEN_WIDTH - display->getStringWidth(mode), y, mode);
-    if (config.display.heading_bold)
-        display->drawString(x + SCREEN_WIDTH - display->getStringWidth(mode) - 1, y, mode);
+    //    display->drawString(x + SCREEN_WIDTH - display->getStringWidth(mode), y, mode);
+    //    if (config.display.heading_bold)
+    //        display->drawString(x + SCREEN_WIDTH - display->getStringWidth(mode) - 1, y, mode);
 
-    // Line 2
     uint32_t currentMillis = millis();
     uint32_t seconds = currentMillis / 1000;
     uint32_t minutes = seconds / 60;
@@ -2662,6 +2665,9 @@ void DebugInfo::drawFrameSettings(OLEDDisplay *display, OLEDDisplayUiState *stat
     // hours %= 24;
 
     display->setColor(WHITE);
+
+    // Setup string to assemble analogClock string
+    std::string analogClock = "";
 
     // Show uptime as days, hours, minutes OR seconds
     std::string uptime = screen->drawTimeDelta(days, hours, minutes, seconds);
@@ -2679,17 +2685,36 @@ void DebugInfo::drawFrameSettings(OLEDDisplay *display, OLEDDisplayUiState *stat
         int min = (hms % SEC_PER_HOUR) / SEC_PER_MIN;
         int sec = (hms % SEC_PER_HOUR) % SEC_PER_MIN; // or hms % SEC_PER_MIN
 
-        char timebuf[10];
-        snprintf(timebuf, sizeof(timebuf), " %02d:%02d:%02d", hour, min, sec);
-        uptime += timebuf;
+        char timebuf[12];
+
+        if (config.display.use_12h_clock) {
+            std::string meridiem = "am";
+            if (hour >= 12) {
+                if (hour > 12)
+                    hour -= 12;
+                meridiem = "pm";
+            }
+            if (hour == 00) {
+                hour = 12;
+            }
+            snprintf(timebuf, sizeof(timebuf), "%d:%02d:%02d%s", hour, min, sec, meridiem.c_str());
+        } else {
+            snprintf(timebuf, sizeof(timebuf), "%02d:%02d:%02d", hour, min, sec);
+        }
+        analogClock += timebuf;
     }
 
-    display->drawString(x, y + FONT_HEIGHT_SMALL * 1, uptime.c_str());
+    // Line 1
+    display->drawString(x + SCREEN_WIDTH - display->getStringWidth(uptime.c_str()), y, uptime.c_str());
+
+    // Line 2
+    display->drawString(x, y + FONT_HEIGHT_SMALL * 1, analogClock.c_str());
 
     // Display Channel Utilization
     char chUtil[13];
     snprintf(chUtil, sizeof(chUtil), "ChUtil %2.0f%%", airTime->channelUtilizationPercent());
     display->drawString(x + SCREEN_WIDTH - display->getStringWidth(chUtil), y + FONT_HEIGHT_SMALL * 1, chUtil);
+
 #if HAS_GPS
     if (config.position.gps_mode == meshtastic_Config_PositionConfig_GpsMode_ENABLED) {
         // Line 3
