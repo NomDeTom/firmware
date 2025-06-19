@@ -214,12 +214,12 @@ jobs:
     needs:
       [
         build-esp32,
-        build-esp32-s3,
+        # build-esp32-s3,
         build-esp32-c3,
-        build-esp32-c6,
-        build-nrf52,
-        build-rpi2040,
-        build-stm32,
+        # build-esp32-c6,
+        # build-nrf52,
+        # build-rpi2040,
+        # build-stm32,
       ]
     steps:
       - name: Checkout code
