@@ -302,7 +302,7 @@ jobs:
       upload_url: ${{ steps.create_release.outputs.upload_url }}
     needs:
       - gather-artifacts
-      - build-debian-src
+      # - build-debian-src
       - package-pio-deps-native-tft
     steps:
       - name: Checkout
