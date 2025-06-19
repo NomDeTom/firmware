@@ -303,7 +303,7 @@ jobs:
     needs:
       - gather-artifacts
       # - build-debian-src
-      - package-pio-deps-native-tft
+      # - package-pio-deps-native-tft
     steps:
       - name: Checkout
         uses: actions/checkout@v4
