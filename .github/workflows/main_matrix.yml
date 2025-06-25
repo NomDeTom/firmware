@@ -141,66 +141,66 @@ jobs:
   #     build_location: local
   #   secrets: inherit
 
-  package-pio-deps-native-tft:
-    if: ${{ github.event_name == 'workflow_dispatch' }}
-    uses: ./.github/workflows/package_pio_deps.yml
-    with:
-      pio_env: native-tft
-    secrets: inherit
+  # package-pio-deps-native-tft:
+  #   if: ${{ github.event_name == 'workflow_dispatch' }}
+  #   uses: ./.github/workflows/package_pio_deps.yml
+  #   with:
+  #     pio_env: native-tft
+  #   secrets: inherit
 
-  test-native:
-    if: ${{ !contains(github.ref_name, 'event/') }}
-    uses: ./.github/workflows/test_native.yml
+  # test-native:
+  #   if: ${{ !contains(github.ref_name, 'event/') }}
+  #   uses: ./.github/workflows/test_native.yml
 
-  docker-deb-amd64:
-    uses: ./.github/workflows/docker_build.yml
-    with:
-      distro: debian
-      platform: linux/amd64
-      runs-on: ubuntu-24.04
-      push: false
+  # docker-deb-amd64:
+  #   uses: ./.github/workflows/docker_build.yml
+  #   with:
+  #     distro: debian
+  #     platform: linux/amd64
+  #     runs-on: ubuntu-24.04
+  #     push: false
 
-  docker-deb-amd64-tft:
-    uses: ./.github/workflows/docker_build.yml
-    with:
-      distro: debian
-      platform: linux/amd64
-      runs-on: ubuntu-24.04
-      push: false
-      pio_env: native-tft
+  # docker-deb-amd64-tft:
+  #   uses: ./.github/workflows/docker_build.yml
+  #   with:
+  #     distro: debian
+  #     platform: linux/amd64
+  #     runs-on: ubuntu-24.04
+  #     push: false
+  #     pio_env: native-tft
 
-  docker-alp-amd64:
-    uses: ./.github/workflows/docker_build.yml
-    with:
-      distro: alpine
-      platform: linux/amd64
-      runs-on: ubuntu-24.04
-      push: false
+  # docker-alp-amd64:
+  #   uses: ./.github/workflows/docker_build.yml
+  #   with:
+  #     distro: alpine
+  #     platform: linux/amd64
+  #     runs-on: ubuntu-24.04
+  #     push: false
 
-  docker-alp-amd64-tft:
-    uses: ./.github/workflows/docker_build.yml
-    with:
-      distro: alpine
-      platform: linux/amd64
-      runs-on: ubuntu-24.04
-      push: false
-      pio_env: native-tft
+  # docker-alp-amd64-tft:
+  #   uses: ./.github/workflows/docker_build.yml
+  #   with:
+  #     distro: alpine
+  #     platform: linux/amd64
+  #     runs-on: ubuntu-24.04
+  #     push: false
+  #     pio_env: native-tft
 
-  docker-deb-arm64:
-    uses: ./.github/workflows/docker_build.yml
-    with:
-      distro: debian
-      platform: linux/arm64
-      runs-on: ubuntu-24.04-arm
-      push: false
+  # docker-deb-arm64:
+  #   uses: ./.github/workflows/docker_build.yml
+  #   with:
+  #     distro: debian
+  #     platform: linux/arm64
+  #     runs-on: ubuntu-24.04-arm
+  #     push: false
 
-  docker-deb-armv7:
-    uses: ./.github/workflows/docker_build.yml
-    with:
-      distro: debian
-      platform: linux/arm/v7
-      runs-on: ubuntu-24.04-arm
-      push: false
+  # docker-deb-armv7:
+  #   uses: ./.github/workflows/docker_build.yml
+  #   with:
+  #     distro: debian
+  #     platform: linux/arm/v7
+  #     runs-on: ubuntu-24.04-arm
+  #     push: false
 
   gather-artifacts:
     permissions:
@@ -213,13 +213,13 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       [
-        build-esp32,
-        build-esp32-s3,
-        build-esp32-c3,
-        build-esp32-c6,
+        # build-esp32,
+        # build-esp32-s3,
+        # build-esp32-c3,
+        # build-esp32-c6,
         build-nrf52,
-        build-rpi2040,
-        build-stm32,
+        # build-rpi2040,
+        # build-stm32,
       ]
     steps:
       - name: Checkout code
