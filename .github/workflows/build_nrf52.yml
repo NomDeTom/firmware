@@ -2,8 +2,8 @@ name: Build NRF52
 
 on:
   workflow_call:
-    # inputs:
-      board: seeed_xiao_nrf52840_kit
+    inputs:
+      board:
         required: true
         type: string
 
@@ -20,7 +20,7 @@ jobs:
         uses: ./.github/actions/build-variant
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          board: ${{ inputs.board }}
+          board: seeed_xiao_nrf52840_kit
           build-script-path: bin/build-nrf52.sh
           artifact-paths: |
             release/*.hex
