@@ -114,7 +114,8 @@ jobs:
       matrix: ${{ fromJson(needs.setup.outputs.nrf52840) }}
     uses: ./.github/workflows/build_nrf52.yml
     with:
-      board: ${{ matrix.board }}
+      board: seeed_xiao_nrf52840_kit
+      # board: ${{ matrix.board }}
 
   # build-rpi2040:
   #   needs: setup
