@@ -2,8 +2,8 @@ name: Build NRF52
 
 on:
   workflow_call:
-    inputs:
-      board:
+    # inputs:
+      board: seeed_xiao_nrf52840_kit
         required: true
         type: string
 
