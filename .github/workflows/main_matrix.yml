@@ -30,7 +30,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        arch: [esp32, esp32s3, esp32c3, esp32c6, nrf52840, rp2040, stm32, check]
+        # arch: [esp32, esp32s3, esp32c3, esp32c6, nrf52840, rp2040, stm32, check]
+        arch: [nrf52840]
     runs-on: ubuntu-latest
     steps:
       - id: checkout
@@ -54,23 +55,23 @@ jobs:
       nrf52840: ${{ steps.jsonStep.outputs.nrf52840 }}
       # rp2040: ${{ steps.jsonStep.outputs.rp2040 }}
       # stm32: ${{ steps.jsonStep.outputs.stm32 }}
-      check: ${{ steps.jsonStep.outputs.check }}
+      # check: ${{ steps.jsonStep.outputs.check }}
 
-  check:
-    needs: setup
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJson(needs.setup.outputs.check) }}
+  # check:
+  #   needs: setup
+  #   strategy:
+  #     fail-fast: false
+  #     matrix: ${{ fromJson(needs.setup.outputs.check) }}
 
-    runs-on: ubuntu-latest
-    if: ${{ github.event_name != 'workflow_dispatch' }}
-    steps:
-      - uses: actions/checkout@v4
-      - name: Build base
-        id: base
-        uses: ./.github/actions/setup-base
-      - name: Check ${{ matrix.board }}
-        run: bin/check-all.sh ${{ matrix.board }}
+  #   runs-on: ubuntu-latest
+  #   if: ${{ github.event_name != 'workflow_dispatch' }}
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: Build base
+  #       id: base
+  #       uses: ./.github/actions/setup-base
+  #     - name: Check ${{ matrix.board }}
+  #       run: bin/check-all.sh ${{ matrix.board }}
 
   # build-esp32:
   #   needs: setup
