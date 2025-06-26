@@ -83,7 +83,7 @@ static const uint8_t A5 = PIN_A5;
  * GPS_L76K definition preventing this conflict
  */
 
-// #define BUTTON_PIN D0
+#define BUTTON_PIN D0
 
 /*
  * Serial Interfaces
@@ -147,8 +147,8 @@ static const uint8_t SCK = PIN_SPI_SCK;
  */
 // GPS L76K
 #ifdef GPS_L76K
-// #define PIN_GPS_RX D6
-// #define PIN_GPS_TX D7
+#define PIN_GPS_RX (-1)
+#define PIN_GPS_TX (-1)
 #define HAS_GPS 0
 #define GPS_THREAD_INTERVAL 50
 #define PIN_SERIAL1_RX PIN_GPS_TX
