@@ -20,7 +20,7 @@ jobs:
         uses: ./.github/actions/build-variant
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          board: seeed_xiao_nrf52840_kit
+          board: ${{ inputs.board }}
           build-script-path: bin/build-nrf52.sh
           artifact-paths: |
             release/*.hex
