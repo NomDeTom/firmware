@@ -1,4 +1,4 @@
-name: Build_one
+name: Build one board
 concurrency:
   group: ci-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
