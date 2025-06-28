@@ -44,7 +44,7 @@ on:
           - ["meshlink_eink"]
         
     
-    # TARGETS='["seeed_xiao_nrf52840_kit"]'
+
     
     
 jobs:
@@ -52,7 +52,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Echo inputs
-        run: echo "build:$[[ inputs.arch ]] on target:${{ inputs.target }}"
+        run: echo "build:${{ inputs.arch }} on target:${{ inputs.target }}"
   setup:
     strategy:
       fail-fast: false
@@ -66,11 +66,6 @@ jobs:
         name: Checkout base
       - id: jsonStep
         run: |
-          # if [[ "$GITHUB_HEAD_REF" == "" ]]; then
-          #   TARGETS=$(./bin/generate_ci_matrix.py ${{matrix.arch}})
-          # else  
-          #   TARGETS=$(./bin/generate_ci_matrix.py ${{matrix.arch}} quick)
-          # fi
           TARGETS=${{ inputs.target }}
           echo "Name: $GITHUB_REF_NAME Base: $GITHUB_BASE_REF Ref: $GITHUB_REF Targets: $TARGETS"
           echo "${{matrix.arch}}=$(jq -cn --argjson environments $TARGETS '{board: $environments}')" >> $GITHUB_OUTPUT
