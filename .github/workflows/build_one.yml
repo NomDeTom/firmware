@@ -48,6 +48,11 @@ on:
     
     
 jobs:
+  echo:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Echo inputs
+        run: echo "build:${{ inputs.arch }} on target:${{ inputs.target }}"
   setup:
     strategy:
       fail-fast: false
@@ -67,7 +72,7 @@ jobs:
           #   TARGETS=$(./bin/generate_ci_matrix.py ${{matrix.arch}} quick)
           # fi
           TARGETS=[$INPUTS_TARGET]
-          echo "Name: $GITHUB_REF_NAME Base: $GITHUB_BASE_REF Ref: $GITHUB_REF Targets: '$TARGETS'"
+          echo "Name: $GITHUB_REF_NAME Base: $GITHUB_BASE_REF Ref: $GITHUB_REF Targets: $TARGETS"
           echo "${{matrix.arch}}=$(jq -cn --argjson environments $TARGETS '{board: $environments}')" >> $GITHUB_OUTPUT
     outputs:
       # esp32: ${{ steps.jsonStep.outputs.esp32 }}
