@@ -44,7 +44,7 @@ on:
           - ["meshlink_eink"]
         
     
-    TARGETS='["seeed_xiao_nrf52840_kit"]'
+    # TARGETS='["seeed_xiao_nrf52840_kit"]'
     
     
 jobs:
