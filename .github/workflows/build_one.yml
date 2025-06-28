@@ -131,13 +131,10 @@ jobs:
 
   build-nrf52:
     needs: setup
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJson(needs.setup.outputs.nrf52840) }}
     uses: ./.github/workflows/build_nrf52.yml
     with:
       # board: seeed_xiao_nrf52840_kit
-      board: ${{ matrix.board }}
+      board: ${{ inputs.target }}
 
   # build-rpi2040:
   #   needs: setup
