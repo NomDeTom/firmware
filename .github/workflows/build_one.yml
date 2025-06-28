@@ -56,9 +56,7 @@ jobs:
   setup:
     strategy:
       fail-fast: false
-      matrix:
-        # arch: [esp32, esp32s3, esp32c3, esp32c6, nrf52840, rp2040, stm32, check]
-        arch: ${{ github.event.inputs.arch }}
+
     runs-on: ubuntu-latest
     steps:
       - id: checkout
@@ -68,7 +66,7 @@ jobs:
         run: |
           TARGETS=${{ inputs.target }}
           echo "Name: $GITHUB_REF_NAME Base: $GITHUB_BASE_REF Ref: $GITHUB_REF Targets: $TARGETS"
-          echo "${{matrix.arch}}=$(jq -cn --argjson environments $TARGETS '{board: $environments}')" >> $GITHUB_OUTPUT
+          echo "${{github.event.inputs.arch}}=$(jq -cn --argjson environments $TARGETS '{board: $environments}')" >> $GITHUB_OUTPUT
     outputs:
       # esp32: ${{ steps.jsonStep.outputs.esp32 }}
       # esp32s3: ${{ steps.jsonStep.outputs.esp32s3 }}
@@ -256,7 +254,7 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           path: ./
-          pattern: firmware-${{matrix.arch}}-*
+          pattern: firmware-${{github.event.inputs.arch}}-*
           merge-multiple: true
 
       - name: Display structure of downloaded files
@@ -272,7 +270,7 @@ jobs:
       - name: Repackage in single firmware zip
         uses: actions/upload-artifact@v4
         with:
-          name: firmware-${{matrix.arch}}-${{ steps.version.outputs.long }}
+          name: firmware-${{github.event.inputs.arch}}-${{ steps.version.outputs.long }}
           overwrite: true
           path: |
             ./firmware-*.bin
@@ -288,7 +286,7 @@ jobs:
 
       - uses: actions/download-artifact@v4
         with:
-          name: firmware-${{matrix.arch}}-${{ steps.version.outputs.long }}
+          name: firmware-${{github.event.inputs.arch}}-${{ steps.version.outputs.long }}
           merge-multiple: true
           path: ./output
 
@@ -302,12 +300,12 @@ jobs:
           chmod +x ./output/device-update.sh
 
       - name: Zip firmware
-        run: zip -j -9 -r ./firmware-${{matrix.arch}}-${{ steps.version.outputs.long }}.zip ./output
+        run: zip -j -9 -r ./firmware-${{github.event.inputs.arch}}-${{ steps.version.outputs.long }}.zip ./output
 
       - name: Repackage in single elfs zip
         uses: actions/upload-artifact@v4
         with:
-          name: debug-elfs-${{matrix.arch}}-${{ steps.version.outputs.long }}.zip
+          name: debug-elfs-${{github.event.inputs.arch}}-${{ steps.version.outputs.long }}.zip
           overwrite: true
           path: ./*.elf
           retention-days: 30
@@ -315,8 +313,8 @@ jobs:
       - uses: scruplelesswizard/comment-artifact@main
         if: ${{ github.event_name == 'pull_request' }}
         with:
-          name: firmware-${{matrix.arch}}-${{ steps.version.outputs.long }}
-          description: "Download firmware-${{matrix.arch}}-${{ steps.version.outputs.long }}.zip. This artifact will be available for 90 days from creation"
+          name: firmware-${{github.event.inputs.arch}}-${{ steps.version.outputs.long }}
+          description: "Download firmware-${{github.event.inputs.arch}}-${{ steps.version.outputs.long }}.zip. This artifact will be available for 90 days from creation"
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
   release-artifacts:
@@ -412,7 +410,7 @@ jobs:
 
       - uses: actions/download-artifact@v4
         with:
-          pattern: firmware-${{matrix.arch}}-${{ steps.version.outputs.long }}
+          pattern: firmware-${{github.event.inputs.arch}}-${{ steps.version.outputs.long }}
           merge-multiple: true
           path: ./output
 
@@ -425,16 +423,16 @@ jobs:
           chmod +x ./output/device-update.sh
 
       - name: Zip firmware
-        run: zip -j -9 -r ./firmware-${{matrix.arch}}-${{ steps.version.outputs.long }}.zip ./output
+        run: zip -j -9 -r ./firmware-${{github.event.inputs.arch}}-${{ steps.version.outputs.long }}.zip ./output
 
       - uses: actions/download-artifact@v4
         with:
-          name: debug-elfs-${{matrix.arch}}-${{ steps.version.outputs.long }}.zip
+          name: debug-elfs-${{github.event.inputs.arch}}-${{ steps.version.outputs.long }}.zip
           merge-multiple: true
           path: ./elfs
 
       - name: Zip debug elfs
-        run: zip -j -9 -r ./debug-elfs-${{matrix.arch}}-${{ steps.version.outputs.long }}.zip ./elfs
+        run: zip -j -9 -r ./debug-elfs-${{github.event.inputs.arch}}-${{ steps.version.outputs.long }}.zip ./elfs
 
       # For diagnostics
       - name: Display structure of downloaded files
@@ -444,8 +442,8 @@ jobs:
         # Only run when targeting master branch with workflow_dispatch
         if: ${{ github.ref_name == 'master' }}
         run: |
-          gh release upload v${{ steps.version.outputs.long }} ./firmware-${{matrix.arch}}-${{ steps.version.outputs.long }}.zip
-          gh release upload v${{ steps.version.outputs.long }} ./debug-elfs-${{matrix.arch}}-${{ steps.version.outputs.long }}.zip
+          gh release upload v${{ steps.version.outputs.long }} ./firmware-${{github.event.inputs.arch}}-${{ steps.version.outputs.long }}.zip
+          gh release upload v${{ steps.version.outputs.long }} ./debug-elfs-${{github.event.inputs.arch}}-${{ steps.version.outputs.long }}.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
