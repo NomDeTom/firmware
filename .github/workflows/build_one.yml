@@ -53,7 +53,7 @@ jobs:
       fail-fast: false
       matrix:
         # arch: [esp32, esp32s3, esp32c3, esp32c6, nrf52840, rp2040, stm32, check]
-        arch: [[ INPUTS_ARCH ]]
+        arch: [[ $INPUTS_ARCH ]]
     runs-on: ubuntu-latest
     steps:
       - id: checkout
@@ -66,7 +66,7 @@ jobs:
           # else  
           #   TARGETS=$(./bin/generate_ci_matrix.py ${{matrix.arch}} quick)
           # fi
-          TARGETS=${{ github.event.inputs.target }}
+          TARGETS=${{ $INPUTS_TARGET }}
           echo "Name: $GITHUB_REF_NAME Base: $GITHUB_BASE_REF Ref: $GITHUB_REF Targets: '$TARGETS'"
           echo "${{matrix.arch}}=$(jq -cn --argjson environments "$TARGETS" '{board: $environments}')" >> $GITHUB_OUTPUT
     outputs:
