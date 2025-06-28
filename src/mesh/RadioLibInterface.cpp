@@ -210,6 +210,14 @@ bool RadioLibInterface::canSleep()
     return res;
 }
 
+/** Allow other firmware components to ask whether we are currently sending a packet
+Initially implemented to protect T-Echo's capacitive touch button from spurious presses during tx
+*/
+bool RadioLibInterface::isSending()
+{
+    return sendingPacket != NULL;
+}
+
 /** Attempt to cancel a previously sent packet.  Returns true if a packet was found we could cancel */
 bool RadioLibInterface::cancelSending(NodeNum from, PacketId id)
 {
@@ -220,6 +228,12 @@ bool RadioLibInterface::cancelSending(NodeNum from, PacketId id)
     bool result = (p != NULL);
     LOG_DEBUG("cancelSending id=0x%x, removed=%d", id, result);
     return result;
+}
+
+/** Attempt to find a packet in the TxQueue. Returns true if the packet was found. */
+bool RadioLibInterface::findInTxQueue(NodeNum from, PacketId id)
+{
+    return txQueue.find(from, id);
 }
 
 /** radio helper thread callback.
@@ -445,6 +459,9 @@ void RadioLibInterface::handleReceiveInterrupt()
             mp->hop_start = (radioBuffer.header.flags & PACKET_FLAGS_HOP_START_MASK) >> PACKET_FLAGS_HOP_START_SHIFT;
             mp->want_ack = !!(radioBuffer.header.flags & PACKET_FLAGS_WANT_ACK_MASK);
             mp->via_mqtt = !!(radioBuffer.header.flags & PACKET_FLAGS_VIA_MQTT_MASK);
+            // If hop_start is not set, next_hop and relay_node are invalid (firmware <2.3)
+            mp->next_hop = mp->hop_start == 0 ? NO_NEXT_HOP_PREFERENCE : radioBuffer.header.next_hop;
+            mp->relay_node = mp->hop_start == 0 ? NO_RELAY_NODE : radioBuffer.header.relay_node;
 
             addReceiveMetadata(mp);
 

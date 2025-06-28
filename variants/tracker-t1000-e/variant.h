@@ -55,7 +55,7 @@ extern "C" {
 #define BUTTON_PIN (0 + 6) // P0.06
 #define BUTTON_ACTIVE_LOW false
 #define BUTTON_ACTIVE_PULLUP false
-#define BUTTON_SENSE_TYPE 0x6
+#define BUTTON_SENSE_TYPE 0x5 // enable input pull-down
 
 #define HAS_WIRE 1
 
@@ -111,6 +111,7 @@ extern "C" {
 #define GPS_TX_PIN PIN_SERIAL1_TX
 
 #define GPS_BAUDRATE 115200
+#define GPS_PROBETRIES 5
 
 #define PIN_GPS_EN (32 + 11) // P1.11
 #define GPS_EN_ACTIVE HIGH
@@ -150,6 +151,8 @@ extern "C" {
 #define T1000X_VCC_PIN (0 + 4)  // P0.4
 #define T1000X_NTC_PIN (0 + 31) // P0.31/AIN7
 #define T1000X_LUX_PIN (0 + 29) // P0.29/AIN5
+
+#define HAS_SCREEN 0
 
 #ifdef __cplusplus
 }

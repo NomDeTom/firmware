@@ -65,6 +65,13 @@ const RegionInfo regions[] = {
     RDEF(ANZ, 915.0f, 928.0f, 100, 0, 30, true, false, false),
 
     /*
+        433.05 - 434.79 MHz, 25mW EIRP max, No duty cycle restrictions
+        AU Low Interference Potential https://www.acma.gov.au/licences/low-interference-potential-devices-lipd-class-licence
+        NZ General User Radio Licence for Short Range Devices https://gazette.govt.nz/notice/id/2022-go3100
+     */
+    RDEF(ANZ_433, 433.05f, 434.79f, 100, 0, 14, true, false, false),
+
+    /*
         https://digital.gov.ru/uploaded/files/prilozhenie-12-k-reshenyu-gkrch-18-46-03-1.pdf
 
         Note:
@@ -73,9 +80,10 @@ const RegionInfo regions[] = {
     RDEF(RU, 868.7f, 869.2f, 100, 0, 20, true, false, false),
 
     /*
-        ???
+        https://www.law.go.kr/LSW/admRulLsInfoP.do?admRulId=53943&efYd=0
+        https://resources.lora-alliance.org/technical-specifications/rp002-1-0-4-regional-parameters
      */
-    RDEF(KR, 920.0f, 923.0f, 100, 0, 0, true, false, false),
+    RDEF(KR, 920.0f, 923.0f, 100, 0, 23, true, false, false),
 
     /*
         Taiwan, 920-925Mhz, limited to 0.5W indoor or coastal, 1.0W outdoor.
@@ -261,7 +269,7 @@ uint8_t RadioInterface::getCWsize(float snr)
     const uint32_t SNR_MIN = -20;
 
     // The maximum value for a LoRa SNR
-    const uint32_t SNR_MAX = 15;
+    const uint32_t SNR_MAX = 10;
 
     return map(snr, SNR_MIN, SNR_MAX, CWmin, CWmax);
 }
@@ -340,6 +348,10 @@ void printPacket(const char *prefix, const meshtastic_MeshPacket *p)
         out += DEBUG_PORT.mt_sprintf(" via MQTT");
     if (p->hop_start != 0)
         out += DEBUG_PORT.mt_sprintf(" hopStart=%d", p->hop_start);
+    if (p->next_hop != 0)
+        out += DEBUG_PORT.mt_sprintf(" nextHop=0x%x", p->next_hop);
+    if (p->relay_node != 0)
+        out += DEBUG_PORT.mt_sprintf(" relay=0x%x", p->relay_node);
     if (p->priority != 0)
         out += DEBUG_PORT.mt_sprintf(" priority=%d", p->priority);
 
@@ -483,11 +495,6 @@ void RadioInterface::applyModemConfig()
                 cr = 8;
                 sf = 12;
                 break;
-            case meshtastic_Config_LoRaConfig_ModemPreset_VERY_LONG_SLOW:
-                bw = (myRegion->wideLora) ? 203.125 : 62.5;
-                cr = 8;
-                sf = 12;
-                break;
             }
         } else {
             sf = loraConfig.spread_factor;
@@ -528,8 +535,8 @@ void RadioInterface::applyModemConfig()
 
     power = loraConfig.tx_power;
 
-    if ((power == 0) || ((power + REGULATORY_GAIN_LORA > myRegion->powerLimit) && !devicestate.owner.is_licensed))
-        power = myRegion->powerLimit - REGULATORY_GAIN_LORA;
+    if ((power == 0) || ((power > myRegion->powerLimit) && !devicestate.owner.is_licensed))
+        power = myRegion->powerLimit;
 
     if (power == 0)
         power = 17; // Default to this power level if we don't have a valid regional power limit (powerLimit of myRegion defaults
@@ -566,7 +573,7 @@ void RadioInterface::applyModemConfig()
     saveChannelNum(channel_num);
     saveFreq(freq + loraConfig.frequency_offset);
 
-    slotTimeMsec = computeSlotTimeMsec(bw, sf);
+    slotTimeMsec = computeSlotTimeMsec();
     preambleTimeMsec = getPacketTime((uint32_t)0);
     maxPacketTimeMsec = getPacketTime(meshtastic_Constants_DATA_PAYLOAD_LEN + sizeof(PacketHeader));
 
@@ -579,6 +586,25 @@ void RadioInterface::applyModemConfig()
     LOG_INFO("channel_num: %d", channel_num + 1);
     LOG_INFO("frequency: %f", getFreq());
     LOG_INFO("Slot time: %u msec", slotTimeMsec);
+}
+
+/** Slottime is the time to detect a transmission has started, consisting of:
+  - CAD duration;
+  - roundtrip air propagation time (assuming max. 30km between nodes);
+  - Tx/Rx turnaround time (maximum of SX126x and SX127x);
+  - MAC processing time (measured on T-beam) */
+uint32_t RadioInterface::computeSlotTimeMsec()
+{
+    float sumPropagationTurnaroundMACTime = 0.2 + 0.4 + 7; // in milliseconds
+    float symbolTime = pow(2, sf) / bw;                    // in milliseconds
+
+    if (myRegion->wideLora) {
+        // CAD duration derived from AN1200.22 of SX1280
+        return (NUM_SYM_CAD_24GHZ + (2 * sf + 3) / 32) * symbolTime + sumPropagationTurnaroundMACTime;
+    } else {
+        // CAD duration for SX127x is max. 2.25 symbols, for SX126x it is number of symbols + 0.5 symbol
+        return max(2.25, NUM_SYM_CAD + 0.5) * symbolTime + sumPropagationTurnaroundMACTime;
+    }
 }
 
 /**
@@ -597,7 +623,12 @@ void RadioInterface::limitPower()
         power = maxPower;
     }
 
-    LOG_INFO("Set radio: final power level=%d", power);
+    if (TX_GAIN_LORA > 0) {
+        LOG_INFO("Requested Tx power: %d dBm; Device LoRa Tx gain: %d dB", power, TX_GAIN_LORA);
+        power -= TX_GAIN_LORA;
+    }
+
+    LOG_INFO("Final Tx power: %d dBm", power);
 }
 
 void RadioInterface::deliverToReceiver(meshtastic_MeshPacket *p)
@@ -620,8 +651,8 @@ size_t RadioInterface::beginSending(meshtastic_MeshPacket *p)
     radioBuffer.header.to = p->to;
     radioBuffer.header.id = p->id;
     radioBuffer.header.channel = p->channel;
-    radioBuffer.header.next_hop = 0;   // *** For future use ***
-    radioBuffer.header.relay_node = 0; // *** For future use ***
+    radioBuffer.header.next_hop = p->next_hop;
+    radioBuffer.header.relay_node = p->relay_node;
     if (p->hop_limit > HOP_MAX) {
         LOG_WARN("hop limit %d is too high, setting to %d", p->hop_limit, HOP_RELIABLE);
         p->hop_limit = HOP_RELIABLE;
@@ -632,7 +663,7 @@ size_t RadioInterface::beginSending(meshtastic_MeshPacket *p)
 
     // if the sender nodenum is zero, that means uninitialized
     assert(radioBuffer.header.from);
-
+    assert(p->encrypted.size <= sizeof(radioBuffer.payload));
     memcpy(radioBuffer.payload, p->encrypted.bytes, p->encrypted.size);
 
     sendingPacket = p;

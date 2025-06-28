@@ -1,5 +1,8 @@
+
+#define TFT_CS 12
+
 // ST7789 TFT LCD
-#define ST7789_CS 12
+#define ST7789_CS TFT_CS
 #define ST7789_RS 11  // DC
 #define ST7789_SDA 41 // MOSI
 #define ST7789_SCK 40
@@ -25,23 +28,25 @@
 #define TOUCH_I2C_PORT 0
 #define TOUCH_SLAVE_ADDRESS 0x5D // GT911
 
+#define USE_POWERSAVE
 #define SLEEP_TIME 120
 
-#ifndef HAS_TFT
-#define BUTTON_PIN 0
-// #define BUTTON_NEED_PULLUP
-#endif
+#define TB_PRESS 0
+#define BUTTON_ACTIVE_LOW true
+#define BUTTON_ACTIVE_PULLUP true
+
 #define GPS_DEFAULT_NOT_PRESENT 1
 #define GPS_RX_PIN 44
 #define GPS_TX_PIN 43
 
 // Have SPI interface SD card slot
-#define HAS_SDCARD 1
+// #define HAS_SDCARD // --> needs to be in platform.ini for device-ui
 #define SPI_MOSI (41)
 #define SPI_SCK (40)
 #define SPI_MISO (38)
 #define SPI_CS (39)
 #define SDCARD_CS SPI_CS
+#define SD_SPI_FREQUENCY 75000000U
 
 #define BATTERY_PIN 4 // A battery voltage measurement pin, voltage divider connected here to measure battery voltage
 // ratio of voltage divider = 2.0 (RD2=100k, RD3=100k)

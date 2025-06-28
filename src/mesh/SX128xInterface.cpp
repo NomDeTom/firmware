@@ -62,10 +62,10 @@ template <typename T> bool SX128xInterface<T>::init()
 
     RadioLibInterface::init();
 
+    limitPower();
+
     if (power > SX128X_MAX_POWER) // This chip has lower power limits than some
         power = SX128X_MAX_POWER;
-
-    limitPower();
 
     preambleLength = 12; // 12 is the default for this chip, 32 does not RX at all
 
@@ -260,8 +260,7 @@ template <typename T> void SX128xInterface<T>::startReceive()
 #endif
 #endif
 
-    // We use the PREAMBLE_DETECTED and HEADER_VALID IRQ flag to detect whether we are actively receiving
-    int err = lora.startReceive(RADIOLIB_SX128X_RX_TIMEOUT_INF, RADIOLIB_IRQ_RX_DEFAULT_FLAGS | RADIOLIB_IRQ_PREAMBLE_DETECTED);
+    int err = lora.startReceive(RADIOLIB_SX128X_RX_TIMEOUT_INF, MESHTASTIC_RADIOLIB_IRQ_RX_FLAGS);
 
     if (err != RADIOLIB_ERR_NONE)
         LOG_ERROR("SX128X startReceive %s%d", radioLibErr, err);
@@ -278,10 +277,17 @@ template <typename T> void SX128xInterface<T>::startReceive()
 template <typename T> bool SX128xInterface<T>::isChannelActive()
 {
     // check if we can detect a LoRa preamble on the current channel
+    ChannelScanConfig_t cfg = {.cad = {.symNum = NUM_SYM_CAD_24GHZ,
+                                       .detPeak = 0,
+                                       .detMin = 0,
+                                       .exitMode = 0,
+                                       .timeout = 0,
+                                       .irqFlags = RADIOLIB_IRQ_CAD_DEFAULT_FLAGS,
+                                       .irqMask = RADIOLIB_IRQ_CAD_DEFAULT_MASK}};
     int16_t result;
 
     setStandby();
-    result = lora.scanChannel();
+    result = lora.scanChannel(cfg);
     if (result == RADIOLIB_LORA_DETECTED)
         return true;
     if (result != RADIOLIB_CHANNEL_FREE)
