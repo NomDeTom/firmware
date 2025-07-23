@@ -76,8 +76,8 @@ NRF52 PRO MICRO PIN ASSIGNMENT
 // WIRE IC AND IIC PINS
 #define WIRE_INTERFACES_COUNT 1
 
-#define PIN_WIRE_SDA (32 + 4) // P1.04
-#define PIN_WIRE_SCL (0 + 11) // P0.11
+#define PIN_WIRE_SDA (0+ 11) // P1.04
+#define PIN_WIRE_SCL (32 + 4) // P0.11
 
 // LED
 #define PIN_LED1 (0 + 15) // P0.15
