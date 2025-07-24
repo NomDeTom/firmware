@@ -83,7 +83,7 @@ static const uint8_t A5 = PIN_A5;
  * GPS_L76K definition preventing this conflict
  */
 
-#define BUTTON_PIN D0
+// #define BUTTON_PIN D0
 
 /*
  * Serial Interfaces
@@ -147,9 +147,9 @@ static const uint8_t SCK = PIN_SPI_SCK;
  */
 // GPS L76K
 #ifdef GPS_L76K
-#define PIN_GPS_RX (-1)
-#define PIN_GPS_TX (-1)
-#define HAS_GPS 0
+#define PIN_GPS_RX D6
+#define PIN_GPS_TX D7
+#define HAS_GPS 1
 #define GPS_THREAD_INTERVAL 50
 #define PIN_SERIAL1_RX PIN_GPS_TX
 #define PIN_SERIAL1_TX PIN_GPS_RX
@@ -189,8 +189,8 @@ static const uint8_t SCK = PIN_SPI_SCK;
 #define PIN_WIRE_SCL D7
 #else
 // Internal LSM6DS3TR on XIAO nRF52840 Series
-#define PIN_WIRE_SDA D6
-#define PIN_WIRE_SCL D7
+#define PIN_WIRE_SDA (17)
+#define PIN_WIRE_SCL (16)
 #endif
 
 static const uint8_t SDA = PIN_WIRE_SDA;
@@ -205,9 +205,9 @@ static const uint8_t SCL = PIN_WIRE_SCL;
  * - SX1262X CS on XIAO BLE legacy pinout
  */
 
-// #if !defined(GPS_L76K) && !defined(SEEED_XIAO_WIO_BTB) && !defined(XIAO_BLE_LEGACY_PINOUT)
+#if !defined(GPS_L76K) && !defined(SEEED_XIAO_WIO_BTB) && !defined(XIAO_BLE_LEGACY_PINOUT)
 #define BUTTON_PIN D0
-// #endif
+#endif
 
 #ifdef __cplusplus
 }
