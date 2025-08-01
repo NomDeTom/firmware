@@ -1,4 +1,4 @@
-name: Build one target
+name: Build One Target
 
 on:
   # # Triggers the workflow on push but only for the master branch
