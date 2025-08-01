@@ -38,7 +38,7 @@ jobs:
           - rp2040
           - rp2350
           - stm32
-          - check
+
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -55,7 +55,7 @@ jobs:
           else  
             TARGETS=$(./bin/generate_ci_matrix.py ${{matrix.arch}} pr)
           fi
-          echo "Name: $GITHUB_REF_NAME Base: $GITHUB_BASE_REF Ref: $GITHUB_REF Targets: $TARGETS"
+          echo "Name: $GITHUB_REF_NAME Base: $GITHUB_BASE_REF Ref: $GITHUB_REF Targets: $TARGETS" >> $GITHUB_STEP_SUMMARY
           echo "${{matrix.arch}}=$(jq -cn --argjson environments "$TARGETS" '{board: $environments}')" >> $GITHUB_OUTPUT
           echo "${{matrix.arch}}=$(jq -cn --argjson environments "$TARGETS" '{board: $environments}')" >> $GITHUB_STEP_SUMMARY
     outputs:
@@ -67,32 +67,10 @@ jobs:
       rp2040: ${{ steps.jsonStep.outputs.rp2040 }}
       rp2350: ${{ steps.jsonStep.outputs.rp2350 }}
       stm32: ${{ steps.jsonStep.outputs.stm32 }}
-      check: ${{ steps.jsonStep.outputs.check }}
+
   
 
-  targ-list:
-    runs-on: ubuntu-24.04
-    needs: setup
-    strategy:
-      fail-fast: false
-      # matrix:
-      #   arch:
-      #     - esp32
-      #     - esp32s3
-      #     - esp32c3
-      #     - esp32c6
-      #     - nrf52840
-      #     - rp2040
-      #     - rp2350
-      #     - stm32
 
-    steps:
-      - name: Target List ${{needs.setup.matrix.arch}}
-        run: |
-                  echo "${{needs.setup.matrix.arch}}=$(jq -cn --argjson environments "$TARGETS" '{board: $environments}')" >> $GITHUB_STEP_SUMMARY
-                  echo "/n"
-                  ${{ needs.setup.steps.jsonStep.outputs.matrix.arch }}
-                  echo "/n"
 
 #   version:
 #     runs-on: ubuntu-latest
