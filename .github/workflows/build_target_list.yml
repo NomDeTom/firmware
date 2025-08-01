@@ -59,12 +59,12 @@ jobs:
           echo "Ref: $GITHUB_REF Targets: $TARGETS" >> $GITHUB_STEP_SUMMARY
           echo "${{matrix.arch}}=$(jq -cn --argjson environments "$TARGETS" '{board: $environments}')" >> $GITHUB_OUTPUT
           echo "${{matrix.arch}}=$(jq -cn --argjson environments $TARGETS '{$environments}')" >> $GITHUB_STEP_SUMMARY
-      - name: Create list of modified files
+      - name: Create list of targets
         id: target_list
         uses: lucaspinheirogit/list-from-string-array-action@v1.4.3
         with:
-          stringArray: ${{ steps.jsonStep.outputs.esp32 }}
-      - name: Print modified files
+          stringArray: ${{ fromJson(steps.jsonStep.outputs) }}
+      - name: Print target list
         run: |
           echo '${{ steps.target_list.outputs.stringList }}' >> $GITHUB_STEP_SUMMARY
       
