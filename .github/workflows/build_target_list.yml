@@ -75,23 +75,23 @@ jobs:
     needs: setup
     strategy:
       fail-fast: false
-      matrix:
-        arch:
-          - esp32
-          - esp32s3
-          - esp32c3
-          - esp32c6
-          - nrf52840
-          - rp2040
-          - rp2350
-          - stm32
+      # matrix:
+      #   arch:
+      #     - esp32
+      #     - esp32s3
+      #     - esp32c3
+      #     - esp32c6
+      #     - nrf52840
+      #     - rp2040
+      #     - rp2350
+      #     - stm32
 
     steps:
-      - name: Target List ${{matrix.arch}}
+      - name: Target List ${{setup.matrix.arch}}
         run: |
-                  echo "${{matrix.arch}}=$(jq -cn --argjson environments "$TARGETS" '{board: $environments}')" >> $GITHUB_STEP_SUMMARY
+                  echo "${{setup.matrix.arch}}=$(jq -cn --argjson environments "$TARGETS" '{board: $environments}')" >> $GITHUB_STEP_SUMMARY
                   echo "/n"
-                  ${{ steps.jsonStep.outputs.matrix.arch }}
+                  ${{ setup.steps.jsonStep.outputs.matrix.arch }}
                   echo "/n"
 
 #   version:
