@@ -1,4 +1,4 @@
-name: CI
+name: Build_one_arch
 concurrency:
   group: ci-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
@@ -36,6 +36,7 @@ on:
           - rp2040
           - rp2350
           - stm32
+          - native
 
 jobs:
   setup:
@@ -210,6 +211,7 @@ jobs:
 
   build-debian-src:
     if: github.repository == 'meshtastic/firmware'
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.arch == 'native' }}
     uses: ./.github/workflows/build_debian_src.yml
     with:
       series: UNRELEASED
@@ -217,7 +219,7 @@ jobs:
     secrets: inherit
 
   package-pio-deps-native-tft:
-    if: ${{ github.event_name == 'workflow_dispatch' }}
+    if: ${{ github.event_name == 'workflow_dispatch' || inputs.arch == 'native' }}
     uses: ./.github/workflows/package_pio_deps.yml
     with:
       pio_env: native-tft
@@ -225,9 +227,11 @@ jobs:
 
   test-native:
     if: ${{ !contains(github.ref_name, 'event/') }}
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.arch == 'native' }}
     uses: ./.github/workflows/test_native.yml
 
   docker-deb-amd64:
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.arch == 'native' }}
     uses: ./.github/workflows/docker_build.yml
     with:
       distro: debian
@@ -236,6 +240,7 @@ jobs:
       push: false
 
   docker-deb-amd64-tft:
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.arch == 'native' }}
     uses: ./.github/workflows/docker_build.yml
     with:
       distro: debian
@@ -245,6 +250,7 @@ jobs:
       pio_env: native-tft
 
   docker-alp-amd64:
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.arch == 'native' }}
     uses: ./.github/workflows/docker_build.yml
     with:
       distro: alpine
@@ -253,6 +259,7 @@ jobs:
       push: false
 
   docker-alp-amd64-tft:
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.arch == 'native' }}
     uses: ./.github/workflows/docker_build.yml
     with:
       distro: alpine
@@ -262,6 +269,7 @@ jobs:
       pio_env: native-tft
 
   docker-deb-arm64:
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.arch == 'native' }}
     uses: ./.github/workflows/docker_build.yml
     with:
       distro: debian
@@ -270,6 +278,7 @@ jobs:
       push: false
 
   docker-deb-armv7:
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.arch == 'native' }}
     uses: ./.github/workflows/docker_build.yml
     with:
       distro: debian
