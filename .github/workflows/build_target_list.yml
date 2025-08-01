@@ -1,4 +1,4 @@
-name: Build one arch
+name: Build target list
 
 on:
   # # Triggers the workflow on push but only for the master branch
@@ -57,6 +57,7 @@ jobs:
           fi
           echo "Name: $GITHUB_REF_NAME Base: $GITHUB_BASE_REF Ref: $GITHUB_REF Targets: $TARGETS"
           echo "${{matrix.arch}}=$(jq -cn --argjson environments "$TARGETS" '{board: $environments}')" >> $GITHUB_OUTPUT
+          echo "${{matrix.arch}}=$(jq -cn --argjson environments "$TARGETS" '{board: $environments}')" >> $GITHUB_STEP_SUMMARY
     outputs:
       esp32: ${{ steps.jsonStep.outputs.esp32 }}
       esp32s3: ${{ steps.jsonStep.outputs.esp32s3 }}
@@ -67,6 +68,31 @@ jobs:
       rp2350: ${{ steps.jsonStep.outputs.rp2350 }}
       stm32: ${{ steps.jsonStep.outputs.stm32 }}
       check: ${{ steps.jsonStep.outputs.check }}
+  
+
+  targ-list:
+    runs-on: ubuntu-24.04
+    needs: setup
+    strategy:
+      fail-fast: false
+      matrix:
+        arch:
+          - esp32
+          - esp32s3
+          - esp32c3
+          - esp32c6
+          - nrf52840
+          - rp2040
+          - rp2350
+          - stm32
+
+    steps:
+      - name: Target List ${{matrix.arch}}
+        run: |
+                  echo "${{matrix.arch}}=$(jq -cn --argjson environments "$TARGETS" '{board: $environments}')" >> $GITHUB_STEP_SUMMARY
+                  echo "/n"
+                  ${{ steps.jsonStep.outputs.matrix.arch }}
+                  echo "/n"
 
 #   version:
 #     runs-on: ubuntu-latest
