@@ -56,13 +56,15 @@ jobs:
           echo "Name: $GITHUB_REF_NAME \n Base: $GITHUB_BASE_REF \n Ref: $GITHUB_REF Targets: $TARGETS" >> $GITHUB_STEP_SUMMARY
           echo "${{matrix.arch}}=$(jq -cn --argjson environments "$TARGETS" '{board: $environments}')" >> $GITHUB_OUTPUT
           echo "${{matrix.arch}}=$(jq -cn --argjson environments "$TARGETS" '{board: $environments}')" >> $GITHUB_STEP_SUMMARY
-
-      # - uses: buildingcash/json-to-markdown-table-action@v1
-      #   id: table
-      #   with:
-      #     json: ${{ steps.jsonStep.outputs }}
-      # - run: echo ${{ steps.table.outputs.table }}
-
+      - name: Create list of modified files
+        id: target_list
+        uses: lucaspinheirogit/list-from-string-array-action@v1.4.3
+        with:
+          stringArray: ${{ steps.jsonStep.outputs.esp32 }}
+      - name: Print modified files
+        run: |
+          echo '${{ steps.target_list.outputs.stringList }}' >> $GITHUB_STEP_SUMMARY
+      
     outputs:
       esp32: ${{ steps.jsonStep.outputs.esp32 }}
       esp32s3: ${{ steps.jsonStep.outputs.esp32s3 }}
@@ -75,27 +77,7 @@ jobs:
 
 
 
-  output-table:
-    needs: setup
-    strategy:
-      fail-fast: false
-      matrix:
-        arch:
-          - esp32
-          - esp32s3
-          - esp32c3
-          - esp32c6
-          - nrf52840
-          - rp2040
-          - rp2350
-          - stm32
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: buildingcash/json-to-markdown-table-action@v1.1.0
-        id: table  
-        with:
-          json: ${{ fromjson(needs.setup.outputs.esp32) }}
-      - run: echo ${{ steps.table.outputs.table }} >> $GITHUB_STEP_SUMMARY
+
 
 #   version:
 #     runs-on: ubuntu-latest
