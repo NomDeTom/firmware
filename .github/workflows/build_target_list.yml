@@ -56,6 +56,7 @@ jobs:
           echo "Arch: ${{matrix.arch}}" >> $GITHUB_STEP_SUMMARY
           echo "Ref: $GITHUB_REF" >> $GITHUB_STEP_SUMMARY
           echo "Targets: $TARGETS" >> $GITHUB_STEP_SUMMARY
+          echo "Targets: $TARGETS | sed 's/[][]//g; s/", "/\n/g; s/"//g' >> $GITHUB_STEP_SUMMARY
           echo "${{matrix.arch}}=$(jq -cn --argjson environments "$TARGETS" '{$environments}')" >> $GITHUB_OUTPUT
     outputs:
       esp32: ${{ steps.jsonStep.outputs.esp32 }}
