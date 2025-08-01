@@ -68,15 +68,6 @@ jobs:
       - name: Print target list
         run: |
           echo '${{ steps.target_list.outputs.stringList }}' >> $GITHUB_STEP_SUMMARY
-      - name: Create list of targets
-        id: target_list2
-        uses: lucaspinheirogit/list-from-string-array-action@v1.4.3
-        with:
-          stringArray: ${{ steps.jsonStep.outputs }}
-      - name: Print target list
-        run: |
-          echo '${{ steps.target_list2.outputs.stringList }}' >> $GITHUB_STEP_SUMMARY
-
     outputs:
       esp32: ${{ steps.jsonStep.outputs.esp32 }}
       esp32s3: ${{ steps.jsonStep.outputs.esp32s3 }}
