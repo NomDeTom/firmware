@@ -208,8 +208,7 @@ jobs:
       platform: stm32
 
   build-debian-src:
-    if: github.repository == 'meshtastic/firmware'
-    if: ${{ github.event_name != 'workflow_dispatch' || inputs.arch == 'native' }}
+    if: ${{ github.repository == 'meshtastic/firmware' && github.event_name != 'workflow_dispatch' || inputs.arch == 'native' }}
     uses: ./.github/workflows/build_debian_src.yml
     with:
       series: UNRELEASED
