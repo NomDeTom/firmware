@@ -1,4 +1,4 @@
-name: Build target list
+name: Build Target List
 
 on:
   # # Triggers the workflow on push but only for the master branch
@@ -87,11 +87,11 @@ jobs:
       #     - stm32
 
     steps:
-      - name: Target List ${{setup.matrix.arch}}
+      - name: Target List ${{needs.setup.matrix.arch}}
         run: |
-                  echo "${{setup.matrix.arch}}=$(jq -cn --argjson environments "$TARGETS" '{board: $environments}')" >> $GITHUB_STEP_SUMMARY
+                  echo "${{needs.setup.matrix.arch}}=$(jq -cn --argjson environments "$TARGETS" '{board: $environments}')" >> $GITHUB_STEP_SUMMARY
                   echo "/n"
-                  ${{ setup.steps.jsonStep.outputs.matrix.arch }}
+                  ${{ needs.setup.steps.jsonStep.outputs.matrix.arch }}
                   echo "/n"
 
 #   version:
