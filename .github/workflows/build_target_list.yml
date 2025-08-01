@@ -94,7 +94,7 @@ jobs:
       - uses: buildingcash/json-to-markdown-table-action@v1.1.0
         id: table  
         with:
-          json: ${{ needs.setup.outputs.esp32 }}
+          json: ${{ fromjson(needs.setup.outputs.esp32) }}
       - run: echo ${{ steps.table.outputs.table }} >> $GITHUB_STEP_SUMMARY
 
 #   version:
