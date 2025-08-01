@@ -510,7 +510,7 @@ jobs:
 
   publish-firmware:
     runs-on: ubuntu-24.04
-    if: ${{ github.event_name == 'workflow_dispatch' }}
+    if: ${{ github.event_name == 'workflow_dispatch' && github.repository == 'meshtastic/firmware'}}
     needs: [release-firmware, version]
     env:
       targets: |-
