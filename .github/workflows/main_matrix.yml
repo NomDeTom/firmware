@@ -21,7 +21,7 @@ on:
       - event/*
     paths-ignore:
       - "**.md"
-      - "**.yml"
+     # - "**.yml"
 
   workflow_dispatch:
 
