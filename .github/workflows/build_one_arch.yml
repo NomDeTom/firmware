@@ -1,26 +1,6 @@
 name: Build One Arch
 
 on:
-  # # Triggers the workflow on push but only for the master branch
-  # push:
-  #   branches:
-  #     - master
-  #     - develop
-  #     - event/*
-  #   paths-ignore:
-  #     - "**.md"
-  #     - version.properties
-
-  # Note: This is different from "pull_request". Need to specify ref when doing checkouts.
-  # pull_request_target:
-  #   branches:
-  #     - master
-  #     - develop
-  #     - event/*
-  #   paths-ignore:
-  #     - "**.md"
-      #- "**.yml"
-
   workflow_dispatch:
     inputs:
       arch:
@@ -40,17 +20,6 @@ jobs:
   setup:
     strategy:
       fail-fast: false
-      # matrix:
-      #   arch:
-      #     - esp32
-      #     - esp32s3
-      #     - esp32c3
-      #     - esp32c6
-      #     - nrf52840
-      #     - rp2040
-      #     - rp2350
-      #     - stm32
-      #     - check
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -94,22 +63,6 @@ jobs:
     outputs:
       long: ${{ steps.version.outputs.long }}
       deb: ${{ steps.version.outputs.deb }}
-
-  # check:
-  #   needs: setup
-  #   strategy:
-  #     fail-fast: false
-  #     matrix: ${{ fromJson(needs.setup.outputs.check) }}
-
-  #   runs-on: ubuntu-latest
-  #   if: ${{ github.event_name != 'workflow_dispatch' }}
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - name: Build base
-  #       id: base
-  #       uses: ./.github/actions/setup-base
-  #     - name: Check ${{ matrix.board }}
-  #       run: bin/check-all.sh ${{ matrix.board }}
 
   build-esp32:
     if: ${{ github.event_name != 'workflow_dispatch' || inputs.arch == 'esp32'}}
