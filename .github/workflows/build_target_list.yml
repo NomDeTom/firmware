@@ -50,14 +50,19 @@ jobs:
       - name: Generate matrix
         id: jsonStep
         run: |
-          if [[ "$GITHUB_HEAD_REF" == "" ]]; then
-            TARGETS=$(./bin/generate_ci_matrix.py ${{matrix.arch}} extra)
-          else  
-            TARGETS=$(./bin/generate_ci_matrix.py ${{matrix.arch}} pr)
-          fi
-          echo "Name: $GITHUB_REF_NAME Base: $GITHUB_BASE_REF Ref: $GITHUB_REF Targets: $TARGETS" >> $GITHUB_STEP_SUMMARY
+          TARGETS=$(./bin/generate_ci_matrix.py ${{matrix.arch}})
+          PRTARGETS=$(./bin/generate_ci_matrix.py ${{matrix.arch}} pr)
+          EXTRATARGETS=$(./bin/generate_ci_matrix.py ${{matrix.arch}} extra)
+          echo "Name: $GITHUB_REF_NAME \n Base: $GITHUB_BASE_REF \n Ref: $GITHUB_REF Targets: $TARGETS" >> $GITHUB_STEP_SUMMARY
           echo "${{matrix.arch}}=$(jq -cn --argjson environments "$TARGETS" '{board: $environments}')" >> $GITHUB_OUTPUT
           echo "${{matrix.arch}}=$(jq -cn --argjson environments "$TARGETS" '{board: $environments}')" >> $GITHUB_STEP_SUMMARY
+
+      - uses: buildingcash/json-to-markdown-table-action@v1
+        id: table
+        with:
+          json: ${{ steps.jsonStep.outputs }}
+      - run: echo ${{ steps.table.outputs.table }}
+
     outputs:
       esp32: ${{ steps.jsonStep.outputs.esp32 }}
       esp32s3: ${{ steps.jsonStep.outputs.esp32s3 }}
@@ -68,9 +73,29 @@ jobs:
       rp2350: ${{ steps.jsonStep.outputs.rp2350 }}
       stm32: ${{ steps.jsonStep.outputs.stm32 }}
 
-  
 
 
+  output-table:
+    needs: setup
+    strategy:
+      fail-fast: false
+      matrix:
+        arch:
+          - esp32
+          - esp32s3
+          - esp32c3
+          - esp32c6
+          - nrf52840
+          - rp2040
+          - rp2350
+          - stm32
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: buildingcash/json-to-markdown-table-action@v1.1.0
+        id: table  
+        with:
+          json: ${{ needs.setup.outputs.esp32 }}
+      - run: echo ${{ steps.table.outputs.table }} >> $GITHUB_STEP_SUMMARY
 
 #   version:
 #     runs-on: ubuntu-latest
