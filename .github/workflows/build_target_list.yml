@@ -53,9 +53,12 @@ jobs:
           TARGETS=$(./bin/generate_ci_matrix.py ${{matrix.arch}})
           PRTARGETS=$(./bin/generate_ci_matrix.py ${{matrix.arch}} pr)
           EXTRATARGETS=$(./bin/generate_ci_matrix.py ${{matrix.arch}} extra)
-          echo "Name: $GITHUB_REF_NAME \n Base: $GITHUB_BASE_REF \n Ref: $GITHUB_REF Targets: $TARGETS" >> $GITHUB_STEP_SUMMARY
+          echo "Name: $GITHUB_REF_NAME" >> $GITHUB_STEP_SUMMARY
+          echo "Base: $GITHUB_BASE_REF" >> $GITHUB_STEP_SUMMARY
+          echo "Arch: ${{matrix.arch}}" >> $GITHUB_STEP_SUMMARY
+          echo "Ref: $GITHUB_REF Targets: $TARGETS" >> $GITHUB_STEP_SUMMARY
           echo "${{matrix.arch}}=$(jq -cn --argjson environments "$TARGETS" '{board: $environments}')" >> $GITHUB_OUTPUT
-          echo "${{matrix.arch}}=$(jq -cn --argjson environments "$TARGETS" '{board: $environments}')" >> $GITHUB_STEP_SUMMARY
+          echo "${{matrix.arch}}=$(jq -cn --argjson environments $TARGETS '{$environments}')" >> $GITHUB_STEP_SUMMARY
       - name: Create list of modified files
         id: target_list
         uses: lucaspinheirogit/list-from-string-array-action@v1.4.3
