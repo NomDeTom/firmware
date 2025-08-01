@@ -57,11 +57,11 @@ jobs:
           echo "${{matrix.arch}}=$(jq -cn --argjson environments "$TARGETS" '{board: $environments}')" >> $GITHUB_OUTPUT
           echo "${{matrix.arch}}=$(jq -cn --argjson environments "$TARGETS" '{board: $environments}')" >> $GITHUB_STEP_SUMMARY
 
-      - uses: buildingcash/json-to-markdown-table-action@v1
-        id: table
-        with:
-          json: ${{ steps.jsonStep.outputs }}
-      - run: echo ${{ steps.table.outputs.table }}
+      # - uses: buildingcash/json-to-markdown-table-action@v1
+      #   id: table
+      #   with:
+      #     json: ${{ steps.jsonStep.outputs }}
+      # - run: echo ${{ steps.table.outputs.table }}
 
     outputs:
       esp32: ${{ steps.jsonStep.outputs.esp32 }}
