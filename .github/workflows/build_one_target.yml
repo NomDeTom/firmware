@@ -165,7 +165,7 @@ jobs:
     needs: [setup, version]
     strategy:
       fail-fast: false
-      matrix: ${{ fromJson(needs.setup.outputs.nrf52840) }}
+    #   matrix: ${{ fromJson(needs.setup.outputs.nrf52840) }}
     uses: ./.github/workflows/build_firmware.yml
     with:
       version: ${{ needs.version.outputs.long }}

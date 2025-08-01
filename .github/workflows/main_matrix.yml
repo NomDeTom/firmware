@@ -4,24 +4,24 @@ concurrency:
   cancel-in-progress: true
 on:
   # # Triggers the workflow on push but only for the master branch
-  push:
-    branches:
-      - master
-      - develop
-      - event/*
-    paths-ignore:
-      - "**.md"
-      - version.properties
+  # push:
+  #   branches:
+  #     - master
+  #     - develop
+  #     - event/*
+  #   paths-ignore:
+  #     - "**.md"
+  #     - version.properties
 
   # Note: This is different from "pull_request". Need to specify ref when doing checkouts.
-  pull_request_target:
-    branches:
-      - master
-      - develop
-      - event/*
-    paths-ignore:
-      - "**.md"
-      #- "**.yml"
+  # pull_request_target:
+  #   branches:
+  #     - master
+  #     - develop
+  #     - event/*
+  #   paths-ignore:
+  #     - "**.md"
+  #     #- "**.yml"
 
   workflow_dispatch:
 
