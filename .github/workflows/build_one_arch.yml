@@ -216,7 +216,7 @@ jobs:
     secrets: inherit
 
   package-pio-deps-native-tft:
-    if: ${{ github.event_name == 'workflow_dispatch' || inputs.arch == 'native' }}
+    if: ${{ inputs.arch == 'native' }}
     uses: ./.github/workflows/package_pio_deps.yml
     with:
       pio_env: native-tft
