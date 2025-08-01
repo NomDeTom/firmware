@@ -58,8 +58,8 @@ jobs:
           echo "Arch: ${{matrix.arch}}" >> $GITHUB_STEP_SUMMARY
           echo "Ref: $GITHUB_REF" >> $GITHUB_STEP_SUMMARY
           echo "Targets: $TARGETS" >> $GITHUB_STEP_SUMMARY
-          echo "${{matrix.arch}}=$(jq -cn --argjson environments $TARGETS '{$environments}')" >> $GITHUB_OUTPUT
-          echo "${{matrix.arch}}=$(jq -cn --argjson environments $TARGETS '{$environments}')" >> $GITHUB_STEP_SUMMARY
+          echo "${{matrix.arch}}=$(jq -cn --argjson environments "$TARGETS" '{$environments}')" >> $GITHUB_OUTPUT
+          echo "${{matrix.arch}}=$(jq -cn --argjson environments "$TARGETS" '{$environments}')" >> $GITHUB_STEP_SUMMARY
       - name: Create list of targets
         id: target_list
         uses: lucaspinheirogit/list-from-string-array-action@v1.4.3
