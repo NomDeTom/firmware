@@ -63,7 +63,7 @@ jobs:
         id: target_list
         uses: lucaspinheirogit/list-from-string-array-action@v1.4.3
         with:
-          stringArray: ${{ fromJson(steps.jsonStep.outputs) }}
+          stringArray: ${{ toJson(steps.jsonStep.outputs) }}
       - name: Print target list
         run: |
           echo '${{ steps.target_list.outputs.stringList }}' >> $GITHUB_STEP_SUMMARY
