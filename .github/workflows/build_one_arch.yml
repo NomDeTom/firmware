@@ -226,8 +226,7 @@ jobs:
     secrets: inherit
 
   test-native:
-    if: ${{ !contains(github.ref_name, 'event/') }}
-    if: ${{ github.event_name != 'workflow_dispatch' || inputs.arch == 'native' }}
+    if: ${{ !contains(github.ref_name, 'event/') && github.event_name != 'workflow_dispatch' ||  !contains(github.ref_name, 'event/') && inputs.arch == 'native' }}
     uses: ./.github/workflows/test_native.yml
 
   docker-deb-amd64:
