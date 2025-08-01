@@ -50,24 +50,13 @@ jobs:
       - name: Generate matrix
         id: jsonStep
         run: |
-          TARGETS=$(./bin/generate_ci_matrix.py ${{matrix.arch}})
-          PRTARGETS=$(./bin/generate_ci_matrix.py ${{matrix.arch}} pr)
-          EXTRATARGETS=$(./bin/generate_ci_matrix.py ${{matrix.arch}} extra)
+          TARGETS=$(./bin/generate_ci_matrix.py ${{matrix.arch}} extra)
           echo "Name: $GITHUB_REF_NAME" >> $GITHUB_STEP_SUMMARY
           echo "Base: $GITHUB_BASE_REF" >> $GITHUB_STEP_SUMMARY
           echo "Arch: ${{matrix.arch}}" >> $GITHUB_STEP_SUMMARY
           echo "Ref: $GITHUB_REF" >> $GITHUB_STEP_SUMMARY
           echo "Targets: $TARGETS" >> $GITHUB_STEP_SUMMARY
-          echo "$(jq -cn --argjson "$TARGETS" '{$environments}')" >> $GITHUB_OUTPUT
-          echo "${{matrix.arch}}=$(jq -cn --argjson environments "$TARGETS" '{$environments}')" >> $GITHUB_STEP_SUMMARY
-      - name: Create list of targets
-        id: target_list
-        uses: lucaspinheirogit/list-from-string-array-action@v1.4.3
-        with:
-          stringArray: ${{ toJson(steps.jsonStep.outputs) }}
-      - name: Print target list
-        run: |
-          echo '${{ steps.target_list.outputs.stringList }}' >> $GITHUB_STEP_SUMMARY
+          echo "${{matrix.arch}}=$(jq -cn --argjson environments "$TARGETS" '{$environments}')" >> $GITHUB_OUTPUT
     outputs:
       esp32: ${{ steps.jsonStep.outputs.esp32 }}
       esp32s3: ${{ steps.jsonStep.outputs.esp32s3 }}
