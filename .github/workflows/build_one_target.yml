@@ -187,7 +187,7 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           path: ./
-          pattern: firmware-${{inputs.target}}-*
+          pattern: firmware-*-*
           merge-multiple: true
 
       - name: Display structure of downloaded files
@@ -215,7 +215,7 @@ jobs:
 
       - uses: actions/download-artifact@v4
         with:
-          name: firmware-${{inputs.target}}-${{ needs.version.outputs.long }}
+          pattern: firmware-*-${{ needs.version.outputs.long }}
           merge-multiple: true
           path: ./output
 
@@ -326,7 +326,7 @@ jobs:
 
       - uses: actions/download-artifact@v4
         with:
-          pattern: firmware-${{inputs.arch}}-${{ needs.version.outputs.long }}
+          pattern: firmware-*-${{ needs.version.outputs.long }}
           merge-multiple: true
           path: ./output
 
@@ -343,7 +343,7 @@ jobs:
 
       - uses: actions/download-artifact@v4
         with:
-          name: debug-elfs-${{inputs.arch}}-${{ needs.version.outputs.long }}.zip
+          pattern: debug-elfs-*-${{ needs.version.outputs.long }}.zip
           merge-multiple: true
           path: ./elfs
 
