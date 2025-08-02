@@ -215,7 +215,7 @@ jobs:
 
       - uses: actions/download-artifact@v4
         with:
-          name: firmware-${{inputs.arch}}-${{ needs.version.outputs.long }}
+          name: firmware-${{inputs.arch}-${{ needs.version.outputs.long }}
           merge-multiple: true
           path: ./output
 
