@@ -18,15 +18,15 @@ on:
       target:
         type: string
         required: false
-        description: 'choose the target board, e.g. nrf52_promicro_diy_tcxo'
+        description: 'choose the target board, e.g. nrf52_promicro_diy_tcxo. If blank, will find available targets.'
 
-      find-target:
-        type: boolean
-        default: true
-        description: 'Find the available targets'
+      # find-target:
+      #   type: boolean
+      #   default: true
+      #   description: 'Find the available targets'
 jobs:
   find-targets:
-    if: ${{ inputs.find-target == true }}
+    if: ${{ inputs.target == '' }}
     strategy:
       fail-fast: false
       matrix:
@@ -70,7 +70,7 @@ jobs:
     #   stm32: ${{ steps.jsonStep.outputs.stm32 }}
 
   setup:
-    if: ${{ inputs.find-target == false }}
+    if: ${{ inputs.target != '' }}
     strategy:
       fail-fast: false
       # matrix:
@@ -108,7 +108,7 @@ jobs:
       check: ${{ steps.jsonStep.outputs.check }}
 
   version:
-    if: ${{ inputs.find-target == false }}
+    if: ${{ inputs.target != '' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -123,8 +123,8 @@ jobs:
       long: ${{ steps.version.outputs.long }}
       deb: ${{ steps.version.outputs.deb }}
 
-  build-esp32:
-    if: ${{ inputs.find-target == false && inputs.arch == 'esp32'}}
+  build-arch:
+    if: ${{ inputs.target != '' && inputs.arch != 'native' }}
     needs: [setup, version]
     strategy:
       fail-fast: false
@@ -132,94 +132,105 @@ jobs:
     with:
       version: ${{ needs.version.outputs.long }}
       pio_env: ${{ inputs.target }}
-      platform: esp32
+      platform: ${{ inputs.arch }}
 
-  build-esp32s3:
-    if: ${{ inputs.find-target == false && inputs.arch == 'esp32s3'}}
-    needs: [setup, version]
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJson(needs.setup.outputs.esp32s3) }}
-    uses: ./.github/workflows/build_firmware.yml
-    with:
-      version: ${{ needs.version.outputs.long }}
-      pio_env: ${{ inputs.target }}
-      platform: esp32s3
+  # build-esp32:
+  #   if: ${{ inputs.target != '' && inputs.arch == 'esp32'}}
+  #   needs: [setup, version]
+  #   strategy:
+  #     fail-fast: false
+  #   uses: ./.github/workflows/build_firmware.yml
+  #   with:
+  #     version: ${{ needs.version.outputs.long }}
+  #     pio_env: ${{ inputs.target }}
+  #     platform: esp32
 
-  build-esp32c3:
-    if: ${{ inputs.find-target == false && inputs.arch == inputs.arch == 'esp32c3'}}
-    needs: [setup, version]
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJson(needs.setup.outputs.esp32c3) }}
-    uses: ./.github/workflows/build_firmware.yml
-    with:
-      version: ${{ needs.version.outputs.long }}
-      pio_env: ${{ inputs.target }}
-      platform: esp32c3
+  # build-esp32s3:
+  #   if: ${{ inputs.target != '' && inputs.arch == 'esp32s3'}}
+  #   needs: [setup, version]
+  #   strategy:
+  #     fail-fast: false
+  #     matrix: ${{ fromJson(needs.setup.outputs.esp32s3) }}
+  #   uses: ./.github/workflows/build_firmware.yml
+  #   with:
+  #     version: ${{ needs.version.outputs.long }}
+  #     pio_env: ${{ inputs.target }}
+  #     platform: esp32s3
 
-  build-esp32c6:
-    if: ${{ inputs.find-target == false && inputs.arch == inputs.arch == 'esp32c6'}}
-    needs: [setup, version]
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJson(needs.setup.outputs.esp32c6) }}
-    uses: ./.github/workflows/build_firmware.yml
-    with:
-      version: ${{ needs.version.outputs.long }}
-      pio_env: ${{ inputs.target }}
-      platform: esp32c6
+  # build-esp32c3:
+  #   if: ${{ inputs.target != '' && inputs.arch == inputs.arch == 'esp32c3'}}
+  #   needs: [setup, version]
+  #   strategy:
+  #     fail-fast: false
+  #     matrix: ${{ fromJson(needs.setup.outputs.esp32c3) }}
+  #   uses: ./.github/workflows/build_firmware.yml
+  #   with:
+  #     version: ${{ needs.version.outputs.long }}
+  #     pio_env: ${{ inputs.target }}
+  #     platform: esp32c3
 
-  build-nrf52840:
-    if: ${{ inputs.find-target == false && inputs.arch == 'nrf52840'}}
-    needs: [setup, version]
-    strategy:
-      fail-fast: false
-    #   matrix: ${{ fromJson(needs.setup.outputs.nrf52840) }}
-    uses: ./.github/workflows/build_firmware.yml
-    with:
-      version: ${{ needs.version.outputs.long }}
-      pio_env: ${{ inputs.target }}
-      platform: nrf52840
+  # build-esp32c6:
+  #   if: ${{ inputs.target != '' && inputs.arch == inputs.arch == 'esp32c6'}}
+  #   needs: [setup, version]
+  #   strategy:
+  #     fail-fast: false
+  #     matrix: ${{ fromJson(needs.setup.outputs.esp32c6) }}
+  #   uses: ./.github/workflows/build_firmware.yml
+  #   with:
+  #     version: ${{ needs.version.outputs.long }}
+  #     pio_env: ${{ inputs.target }}
+  #     platform: esp32c6
 
-  build-rp2040:
-    if: ${{ inputs.find-target == false && inputs.arch == 'rp2040'}}
-    needs: [setup, version]
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJson(needs.setup.outputs.rp2040) }}
-    uses: ./.github/workflows/build_firmware.yml
-    with:
-      version: ${{ needs.version.outputs.long }}
-      pio_env: ${{ inputs.target }}
-      platform: rp2040
+  # build-nrf52840:
+  #   if: ${{ inputs.target != '' && inputs.arch == 'nrf52840'}}
+  #   needs: [setup, version]
+  #   strategy:
+  #     fail-fast: false
+  #   #   matrix: ${{ fromJson(needs.setup.outputs.nrf52840) }}
+  #   uses: ./.github/workflows/build_firmware.yml
+  #   with:
+  #     version: ${{ needs.version.outputs.long }}
+  #     pio_env: ${{ inputs.target }}
+  #     platform: nrf52840
 
-  build-rp2350:
-    if: ${{ inputs.find-target == false && inputs.arch == 'rp2350'}}
-    needs: [setup, version]
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJson(needs.setup.outputs.rp2350) }}
-    uses: ./.github/workflows/build_firmware.yml
-    with:
-      version: ${{ needs.version.outputs.long }}
-      pio_env: ${{ inputs.target }}
-      platform: rp2350
+  # build-rp2040:
+  #   if: ${{ inputs.target != '' && inputs.arch == 'rp2040'}}
+  #   needs: [setup, version]
+  #   strategy:
+  #     fail-fast: false
+  #     matrix: ${{ fromJson(needs.setup.outputs.rp2040) }}
+  #   uses: ./.github/workflows/build_firmware.yml
+  #   with:
+  #     version: ${{ needs.version.outputs.long }}
+  #     pio_env: ${{ inputs.target }}
+  #     platform: rp2040
 
-  build-stm32:
-    if: ${{ inputs.find-target == false && inputs.arch == 'stm32' }}
-    needs: [setup, version]
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJson(needs.setup.outputs.stm32) }}
-    uses: ./.github/workflows/build_firmware.yml
-    with:
-      version: ${{ needs.version.outputs.long }}
-      pio_env: ${{ inputs.target }}
-      platform: stm32
+  # build-rp2350:
+  #   if: ${{ inputs.target != '' && inputs.arch == 'rp2350'}}
+  #   needs: [setup, version]
+  #   strategy:
+  #     fail-fast: false
+  #     matrix: ${{ fromJson(needs.setup.outputs.rp2350) }}
+  #   uses: ./.github/workflows/build_firmware.yml
+  #   with:
+  #     version: ${{ needs.version.outputs.long }}
+  #     pio_env: ${{ inputs.target }}
+  #     platform: rp2350
+
+  # build-stm32:
+  #   if: ${{ inputs.target != '' && inputs.arch == 'stm32' }}
+  #   needs: [setup, version]
+  #   strategy:
+  #     fail-fast: false
+  #     matrix: ${{ fromJson(needs.setup.outputs.stm32) }}
+  #   uses: ./.github/workflows/build_firmware.yml
+  #   with:
+  #     version: ${{ needs.version.outputs.long }}
+  #     pio_env: ${{ inputs.target }}
+  #     platform: stm32
 
   build-debian-src:
-    if: ${{ github.repository == 'meshtastic/firmware' && inputs.find-target == false && inputs.arch == 'native' }}
+    if: ${{ github.repository == 'meshtastic/firmware' && inputs.target != '' && inputs.arch == 'native' }}
     uses: ./.github/workflows/build_debian_src.yml
     with:
       series: UNRELEASED
@@ -234,11 +245,11 @@ jobs:
     secrets: inherit
 
   test-native:
-    if: ${{ !contains(github.ref_name, 'event/') && github.event_name != 'workflow_dispatch' ||  !contains(github.ref_name, 'event/') && inputs.arch == 'native' && inputs.find-target == false }}
+    if: ${{ !contains(github.ref_name, 'event/') && github.event_name != 'workflow_dispatch' ||  !contains(github.ref_name, 'event/') && inputs.arch == 'native' && inputs.target != '' }}
     uses: ./.github/workflows/test_native.yml
 
   docker-deb-amd64:
-    if: ${{ inputs.find-target == false && inputs.arch ==  'native' }}
+    if: ${{ inputs.target != '' && inputs.arch ==  'native' }}
     uses: ./.github/workflows/docker_build.yml
     with:
       distro: debian
@@ -247,7 +258,7 @@ jobs:
       push: false
 
   docker-deb-amd64-tft:
-    if: ${{ inputs.find-target == false && inputs.arch ==  'native' }}
+    if: ${{ inputs.target != '' && inputs.arch ==  'native' }}
     uses: ./.github/workflows/docker_build.yml
     with:
       distro: debian
@@ -257,7 +268,7 @@ jobs:
       pio_env: native-tft
 
   docker-alp-amd64:
-    if: ${{ inputs.find-target == false && inputs.arch ==  'native' }}
+    if: ${{ inputs.target != '' && inputs.arch ==  'native' }}
     uses: ./.github/workflows/docker_build.yml
     with:
       distro: alpine
@@ -266,7 +277,7 @@ jobs:
       push: false
 
   docker-alp-amd64-tft:
-    if: ${{ inputs.find-target == false && inputs.arch ==  'native' }}
+    if: ${{ inputs.target != '' && inputs.arch ==  'native' }}
     uses: ./.github/workflows/docker_build.yml
     with:
       distro: alpine
@@ -276,7 +287,7 @@ jobs:
       pio_env: native-tft
 
   docker-deb-arm64:
-    if: ${{ inputs.find-target == false && inputs.arch ==  'native' }}
+    if: ${{ inputs.target != '' && inputs.arch ==  'native' }}
     uses: ./.github/workflows/docker_build.yml
     with:
       distro: debian
@@ -285,7 +296,7 @@ jobs:
       push: false
 
   docker-deb-armv7:
-    if: ${{ inputs.find-target == false && inputs.arch ==  'native' }}
+    if: ${{ inputs.target != '' && inputs.arch ==  'native' }}
     uses: ./.github/workflows/docker_build.yml
     with:
       distro: debian
@@ -313,14 +324,7 @@ jobs:
     needs:
       [
         version,
-        build-esp32,
-        build-esp32s3,
-        build-esp32c3,
-        build-esp32c6,
-        build-nrf52840,
-        build-rp2040,
-        build-rp2350,
-        build-stm32,
+        build-arch,
       ]
     steps:
       - name: Checkout code
@@ -393,7 +397,7 @@ jobs:
 
   release-artifacts:
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.find-target == false}}
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.target != ''}}
     outputs:
       upload_url: ${{ steps.create_release.outputs.upload_url }}
     needs:
@@ -468,7 +472,7 @@ jobs:
           - rp2350
           - stm32
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.find-target == false}}
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.target != ''}}
     needs: [release-artifacts, version]
     steps:
       - name: Checkout
@@ -520,7 +524,7 @@ jobs:
 
   publish-firmware:
     runs-on: ubuntu-24.04
-    if: ${{ github.event_name == 'workflow_dispatch' && github.repository == 'meshtastic/firmware' && inputs.find-target == false }}
+    if: ${{ github.event_name == 'workflow_dispatch' && github.repository == 'meshtastic/firmware' && inputs.target != '' }}
     needs: [release-firmware, version]
     env:
       targets: |-
