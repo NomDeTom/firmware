@@ -229,12 +229,12 @@ jobs:
           chmod +x ./output/device-update.sh
 
       - name: Zip firmware
-        run: zip -j -9 -r ./firmware-${{inputs.arch}}-${{ needs.version.outputs.long }}.zip ./output
+        run: zip -j -9 -r ./firmware-${{inputs.target}}-${{ needs.version.outputs.long }}.zip ./output
 
       - name: Repackage in single elfs zip
         uses: actions/upload-artifact@v4
         with:
-          name: debug-elfs-${{inputs.arch}}-${{ needs.version.outputs.long }}.zip
+          name: debug-elfs-${{inputs.target}}-${{ needs.version.outputs.long }}.zip
           overwrite: true
           path: ./*.elf
           retention-days: 30
@@ -243,7 +243,7 @@ jobs:
         if: ${{ github.event_name == 'pull_request' }}
         with:
           name: firmware-${{inputs.arch}}-${{ needs.version.outputs.long }}
-          description: "Download firmware-${{inputs.arch}}-${{ needs.version.outputs.long }}.zip. This artifact will be available for 90 days from creation"
+          description: "Download firmware-${{inputs.target}}-${{ needs.version.outputs.long }}.zip. This artifact will be available for 90 days from creation"
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
   release-artifacts:
@@ -339,16 +339,16 @@ jobs:
           chmod +x ./output/device-update.sh
 
       - name: Zip firmware
-        run: zip -j -9 -r ./firmware-${{inputs.arch}}-${{ needs.version.outputs.long }}.zip ./output
+        run: zip -j -9 -r ./firmware-${{inputs.target}}-${{ needs.version.outputs.long }}.zip ./output
 
       - uses: actions/download-artifact@v4
         with:
-          name: debug-elfs-${{inputs.arch}}-${{ needs.version.outputs.long }}.zip
+          name: debug-elfs-${{inputs.target}}-${{ needs.version.outputs.long }}.zip
           merge-multiple: true
           path: ./elfs
 
       - name: Zip debug elfs
-        run: zip -j -9 -r ./debug-elfs-${{inputs.arch}}-${{ needs.version.outputs.long }}.zip ./elfs
+        run: zip -j -9 -r ./debug-elfs-${{inputs.target}}-${{ needs.version.outputs.long }}.zip ./elfs
 
       # For diagnostics
       - name: Display structure of downloaded files
@@ -358,8 +358,8 @@ jobs:
         # Only run when targeting master branch with workflow_dispatch
         if: ${{ github.ref_name == 'master' }}
         run: |
-          gh release upload v${{ needs.version.outputs.long }} ./firmware-${{inputs.arch}}-${{ needs.version.outputs.long }}.zip
-          gh release upload v${{ needs.version.outputs.long }} ./debug-elfs-${{inputs.arch}}-${{ needs.version.outputs.long }}.zip
+          gh release upload v${{ needs.version.outputs.long }} ./firmware-${{inputs.target}}-${{ needs.version.outputs.long }}.zip
+          gh release upload v${{ needs.version.outputs.long }} ./debug-elfs-${{inputs.target}}-${{ needs.version.outputs.long }}.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
