@@ -187,7 +187,7 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           path: ./
-          pattern: firmware-${{inputs.target}}-*
+          pattern: firmware-${{inputs.arch}}-*
           merge-multiple: true
 
       - name: Display structure of downloaded files
@@ -242,7 +242,7 @@ jobs:
       - uses: scruplelesswizard/comment-artifact@main
         if: ${{ github.event_name == 'pull_request' }}
         with:
-          name: firmware-${{inputs.arch}}-${{ needs.version.outputs.long }}
+          name: firmware-${{inputs.target}}-${{ needs.version.outputs.long }}
           description: "Download firmware-${{inputs.target}}-${{ needs.version.outputs.long }}.zip. This artifact will be available for 90 days from creation"
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
