@@ -343,7 +343,7 @@ jobs:
 
       - uses: actions/download-artifact@v4
         with:
-          name: debug-elfs-${{inputs.target}}-${{ needs.version.outputs.long }}.zip
+          name: debug-elfs-${{inputs.arch}}-${{ needs.version.outputs.long }}.zip
           merge-multiple: true
           path: ./elfs
 
