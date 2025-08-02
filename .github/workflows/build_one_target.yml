@@ -187,7 +187,7 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           path: ./
-          pattern: firmware-${{inputs.arch}}-*
+          pattern: firmware-${{inputs.target}}-*
           merge-multiple: true
 
       - name: Display structure of downloaded files
@@ -199,7 +199,7 @@ jobs:
       - name: Repackage in single firmware zip
         uses: actions/upload-artifact@v4
         with:
-          name: firmware-${{inputs.arch}}-${{ needs.version.outputs.long }}
+          name: firmware-${{inputs.target}}-${{ needs.version.outputs.long }}
           overwrite: true
           path: |
             ./firmware-*.bin
