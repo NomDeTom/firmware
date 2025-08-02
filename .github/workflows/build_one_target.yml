@@ -95,13 +95,7 @@ jobs:
       - name: Generate matrix
         id: jsonStep
         run: |
-          if [[ "$GITHUB_HEAD_REF" == "" ]]; then
-            TARGETS=$(./bin/generate_ci_matrix.py ${{inputs.arch}} extra)
-          else  
-            TARGETS=$(./bin/generate_ci_matrix.py ${{inputs.arch}} pr)
-          fi
-          echo "Name: $GITHUB_REF_NAME Base: $GITHUB_BASE_REF Ref: $GITHUB_REF Targets: $TARGETS"
-          echo "${{ inputs.arch }}=$(jq -cn --argjson environments "$TARGETS" --arg board \"${{ inputs.target }}\" '{environments: $environments, board: $board}')" >> $GITHUB_OUTPUT
+          echo "${{ inputs.arch }}=$(jq -cn --argjson environments "$TARGETS" --arg board \'${{ inputs.target }}\' '{environments: $environments, board: $board}')" >> $GITHUB_OUTPUT
     outputs:
       esp32: ${{ steps.jsonStep.outputs.esp32 }}
       esp32s3: ${{ steps.jsonStep.outputs.esp32s3 }}
