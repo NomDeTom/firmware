@@ -95,7 +95,7 @@ jobs:
       - name: Generate matrix
         id: jsonStep
         run: |
-          echo "${{ inputs.arch }}=$(jq -cn --argjson environments "$TARGETS" --arg board \'${{ inputs.target }}\' '{environments: $environments, board: $board}')" >> $GITHUB_OUTPUT
+          echo "${{ inputs.arch }}=$(jq -cn --argjson environments "$TARGETS" --arg board ${{ inputs.target }} '{environments: $environments, board: $board}')" >> $GITHUB_OUTPUT
     outputs:
       esp32: ${{ steps.jsonStep.outputs.esp32 }}
       esp32s3: ${{ steps.jsonStep.outputs.esp32s3 }}
