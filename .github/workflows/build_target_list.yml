@@ -1,5 +1,11 @@
 name: Build Target List
 
+permissions:
+  contents: read
+  actions: read
+  checks: read
+  pull-requests: read
+
 on:
   # # Triggers the workflow on push but only for the master branch
   # push:
@@ -19,10 +25,9 @@ on:
   #     - event/*
   #   paths-ignore:
   #     - "**.md"
-      #- "**.yml"
+  #- "**.yml"
 
   workflow_dispatch:
-
 
 jobs:
   setup:
